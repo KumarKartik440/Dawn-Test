@@ -1,0 +1,160 @@
+/* Custom overrides to mirror Figma design
+   - Add Figma tokens here; they override Dawn safely.
+   - After updating tokens, verify across sections.
+*/
+
+:root {
+  /* Colors (replace with Figma hex) */
+  --figma-primary: 18,18,18;        /* e.g., #121212 */
+  --figma-on-primary: 255,255,255;  /* e.g., #FFFFFF */
+  --figma-secondary: 241,241,241;   /* e.g., #F1F1F1 */
+  --figma-accent: 0,122,255;        /* e.g., #007AFF */
+  --figma-link: 0,122,255;          /* link color */
+  --figma-surface: 255,255,255;     /* backgrounds */
+  --figma-text: 18,18,18;           /* main text */
+
+  /* Typography scales (adjust per Figma) */
+  --figma-heading-scale: 1.00;  /* 1.00 = Dawn default; increase to scale up headings */
+  --figma-body-scale: 1.00;     /* 1.00 = Dawn default; increase to scale up body */
+
+  /* Spacing and layout */
+  --figma-page-width: 120rem;           /* e.g., 1200px */
+  --figma-section-space-desktop: 64px;  /* e.g., 64 */
+  --figma-section-space-mobile: 32px;   /* e.g., 32 */
+
+  /* Radius and shadows (match Figma components) */
+  --figma-radius: 8px;                  /* global corner radius */
+  --figma-button-radius: 8px;
+}
+
+/* Map Figma tokens into Dawn CSS custom properties */
+:root {
+  /* Colors */
+  --color-foreground: var(--figma-text);
+  --color-link: var(--figma-link);
+  --color-button: var(--figma-primary);
+  --color-button-text: var(--figma-on-primary);
+  --color-secondary-button: var(--figma-surface);
+  --color-secondary-button-text: var(--figma-text);
+
+  /* Typography */
+  --font-heading-scale: calc(var(--figma-heading-scale) * var(--font-heading-scale));
+  --font-body-scale: calc(var(--figma-body-scale) * var(--font-body-scale));
+
+  /* Layout */
+  --page-width: var(--figma-page-width);
+  --spacing-sections-desktop: var(--figma-section-space-desktop);
+  --spacing-sections-mobile: var(--figma-section-space-mobile);
+
+  /* Radius */
+  --buttons-radius: var(--figma-button-radius);
+  --text-boxes-radius: var(--figma-radius);
+  --media-radius: var(--figma-radius);
+}
+
+/* Typography fine-tuning (set exact Figma sizes if needed) */
+/* Example:
+.h1 { font-size: 56px; line-height: 1.1; letter-spacing: 0; }
+.body { font-size: 16px; }
+*/
+
+/* Button style adjustments to match Figma */
+.button {
+  letter-spacing: 0.08rem; /* adjust if Figma uses tighter tracking */
+}
+
+/* Links */
+.underlined-link,
+.customer a,
+.inline-richtext a {
+  color: rgb(var(--color-link));
+}
+
+/* Cards and containers (optional subtle elevation per Figma) */
+.contains-card--product .card,
+.contains-card--collection .card,
+.contains-card--article .card,
+.content-container {
+  /* Example shadow; adjust per Figma */
+  --shadow-opacity: 0.06;
+}
+
+/* Header/Footer tweaks placeholder */
+/* Add spacing, borders, or background tweaks per Figma */
+
+/* Component-specific overrides can go below, section by section */
+/* Hero */
+/* .section-hero { ... } */
+
+/* Product grid */
+/* .card-product .price { ... } */
+
+/* Badges */
+/* .badge { border-radius: 999px; } */
+
+/* ==============================
+   Figma Landing styles
+   ============================== */
+.figma-landing {
+  --hero-padding-y: clamp(32px, 6vw, 72px);
+  --grid-gap: 16px;
+}
+
+/* Hero */
+.figma-hero { position: relative; overflow: hidden; background: rgb(var(--figma-surface)); }
+.figma-hero__bg { width: 100%; height: auto; display: block; object-fit: cover; }
+.figma-hero__inner { position: relative; margin-top: -32%; /* pull content over bg image like Figma */ padding: var(--hero-padding-y) 0; }
+
+/* Ribbon and badge at top */
+.figma-hero__ribbon { display:inline-block; background:#fff; padding:8px 16px; border:1.5px solid #000; border-radius: 999px; font-size:14px; }
+.figma-hero__badge { float:right; display:flex; gap:12px; align-items:center; }
+.figma-hero__badge-cta { background:#ffe44d; border:1.5px solid #000; padding:10px 16px; border-radius:6px; font-weight:600; display:inline-flex; align-items:center; gap:10px; text-decoration:none; color:#111; }
+
+/* Content */
+.figma-hero__title { font-weight:800; letter-spacing:-0.02em; margin:24px 0 12px; border:3px solid #000; display:inline-block; padding:8px 12px; background:#fff; }
+.figma-hero__subtitle { max-width:60ch; background:#fff; border:2px solid #000; padding:16px; }
+.figma-hero__cta { margin-top:20px; display:inline-flex; align-items:center; gap:12px; border-radius:6px; background:#000; color:#fff; padding:14px 20px; text-decoration:none; }
+.figma-hero__cta[data-animate="pulse"] { animation: pulseBtn 2s infinite; }
+.figma-hero__caption { margin-top:24px; text-align:center; letter-spacing:0.12em; font-size:12px; border:1.5px solid #000; padding:6px 10px; display:inline-block; background:#fff; }
+
+@keyframes pulseBtn { 0%,100%{ transform: scale(1);} 50%{ transform: scale(1.04);} }
+
+/* Grid */
+.figma-grid { margin-top: clamp(24px, 6vw, 64px); }
+.figma-grid__heading { margin-bottom: 16px; }
+.figma-grid__list { display:grid; grid-template-columns: repeat(3, 1fr); gap: var(--grid-gap); }
+.figma-grid__card { position:relative; display:block; width:100%; border:none; padding:0; background:none; cursor:pointer; }
+.figma-grid__card img { width:100%; height:auto; display:block; border-radius: 8px; }
+.figma-grid__card--placeholder { display:flex; align-items:center; justify-content:center; min-height:220px; background:#f6f6f6; border:1px dashed #ccc; border-radius:8px; color:#666; }
+.figma-grid__plus { position:absolute; right:10px; top:10px; width:28px; height:28px; background:#fff; border-radius:50%; border:1px solid #e5e5e5; display:grid; place-items:center; font-weight:700; }
+
+/* Modal */
+.figma-modal[hidden] { display:none; }
+.figma-modal { position:fixed; inset:0; z-index: 1000; }
+.figma-modal__backdrop { position:absolute; inset:0; background:rgba(0,0,0,.45); }
+.figma-modal__dialog { position:relative; margin: 6vh auto; max-width: 680px; background:#fff; border-radius: 8px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,.2); }
+.figma-modal__close { position:absolute; right:10px; top:8px; width:36px; height:36px; border:none; background:#fff; border-radius:50%; box-shadow: 0 1px 3px rgba(0,0,0,.15); cursor:pointer; }
+.figma-modal__content { display:grid; grid-template-columns: 220px 1fr; gap:16px; padding:20px 20px 24px; }
+.figma-modal__left img { width:100%; height:auto; border-radius:6px; }
+.figma-modal__title { margin:0 0 6px; font-size:20px; font-weight:700; }
+.figma-modal__price { font-weight:700; margin-bottom:8px; }
+.figma-modal__desc { font-size:14px; color:#444; margin-bottom:12px; }
+
+/* Options */
+.figma-opt { margin-bottom:12px; }
+.figma-opt__label { display:block; font-size:12px; font-weight:600; margin-bottom:6px; }
+.figma-opt__values { display:flex; flex-wrap:wrap; gap:8px; }
+.figma-opt__btn { border:1px solid #ccc; background:#fff; padding:8px 10px; border-radius: 6px; cursor:pointer; font-size:13px; }
+.figma-opt__btn.is-active { outline:2px solid #000; border-color:#000; }
+
+/* Responsive */
+@media (max-width: 990px) {
+  .figma-hero__inner { margin-top: -20%; }
+  .figma-grid__list { grid-template-columns: repeat(2, 1fr); }
+  .figma-modal__content { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .figma-grid__list { grid-template-columns: 1fr; }
+  .figma-hero__subtitle { font-size: 14px; }
+  .figma-hero__title { font-size: clamp(28px, 6vw, 38px); }
+}

@@ -1,0 +1,128 @@
+{% comment %}
+  Figma Landing Section
+  - Banner with editable texts and CTA
+  - Grid of 6 products (product picker blocks)
+  - Modal renders product details and variants dynamically via assets/figma-landing.js
+  - No jQuery; vanilla JS only
+{% endcomment %}
+
+<section id="figma-landing-{{ section.id }}" class="figma-landing">
+  <div class="figma-hero">
+    {% if section.settings.hero_image != blank %}
+      <img class="figma-hero__bg" src="{{ section.settings.hero_image | image_url: width: 2880 }}" alt="" loading="lazy">
+    {% endif %}
+    <div class="figma-hero__inner page-width">
+      {% if section.settings.ribbon_text != blank %}
+        <div class="figma-hero__ribbon">{{ section.settings.ribbon_text }}</div>
+      {% endif %}
+      {% if section.settings.badge_text != blank %}
+        <div class="figma-hero__badge">
+          <span>{{ section.settings.badge_text }}</span>
+          {% if section.settings.badge_link_label != blank %}
+            <a href="{{ section.settings.badge_link_url }}" class="figma-hero__badge-cta">
+              {{ section.settings.badge_link_label }}
+              <span class="arrow" aria-hidden>→</span>
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+      <div class="figma-hero__content">
+        {% if section.settings.title != blank %}
+          <h1 class="h1 figma-hero__title">{{ section.settings.title }}</h1>
+        {% endif %}
+        {% if section.settings.subtitle != blank %}
+          <p class="figma-hero__subtitle">{{ section.settings.subtitle }}</p>
+        {% endif %}
+        {% if section.settings.cta_label != blank %}
+          <a href="{{ section.settings.cta_url }}" class="button button--primary figma-hero__cta" data-animate="pulse">
+            <span>{{ section.settings.cta_label }}</span>
+            <span class="arrow" aria-hidden>→</span>
+          </a>
+        {% endif %}
+        {% if section.settings.bottom_caption != blank %}
+          <div class="figma-hero__caption">{{ section.settings.bottom_caption }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="figma-grid page-width">
+    {% if section.settings.grid_heading != blank %}
+      <h2 class="h2 figma-grid__heading">{{ section.settings.grid_heading }}</h2>
+    {% endif %}
+    <div class="figma-grid__list">
+      {%- for block in section.blocks limit: 6 -%}
+        {%- assign product = block.settings.product -%}
+        <article class="figma-grid__item" {{ block.shopify_attributes }}>
+          {%- if product != blank and product.featured_image -%}
+            <button type="button"
+                    class="figma-grid__card js-open-product"
+                    data-product-handle="{{ product.handle }}"
+                    aria-label="Open {{ product.title }} details">
+              <img src="{{ product.featured_image | image_url: width: 800 }}" alt="{{ product.title | escape }}" loading="lazy">
+              <span class="figma-grid__plus" aria-hidden>＋</span>
+            </button>
+          {%- else -%}
+            <div class="figma-grid__card figma-grid__card--placeholder">
+              <div class="placeholder">Select a product</div>
+            </div>
+          {%- endif -%}
+        </article>
+      {%- endfor -%}
+    </div>
+  </div>
+
+  <!-- Modal Container -->
+  <div class="figma-modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Quick view">
+    <div class="figma-modal__backdrop" data-close></div>
+    <div class="figma-modal__dialog" role="document">
+      <button class="figma-modal__close" type="button" aria-label="Close" data-close>×</button>
+      <div class="figma-modal__content">
+        <!-- Filled by JS: image, title, price, description, variant pickers, add to cart -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.FIGMA_LANDING = window.FIGMA_LANDING || {};
+    window.FIGMA_LANDING["{{ section.id }}"] = {
+      addToCartText: {{ section.settings.add_to_cart_label | json }},
+      chooseColorText: {{ section.settings.choose_color_label | json }},
+      chooseSizeText: {{ section.settings.choose_size_label | json }},
+      upsellHandle: {{ section.settings.upsell_product.handle | json }},
+    };
+  </script>
+  {{ 'figma-landing.js' | asset_url | script_tag }}
+</section>
+
+{% schema %}
+{
+  "name": "Figma landing",
+  "settings": [
+    { "type": "image_picker", "id": "hero_image", "label": "Hero background image" },
+    { "type": "text", "id": "ribbon_text", "label": "Top ribbon text", "default": "Find the ideal gift for your loved ones." },
+    { "type": "text", "id": "badge_text", "label": "Top right badge text", "default": "CHOOSE GIFT" },
+    { "type": "url", "id": "badge_link_url", "label": "Badge link URL" },
+    { "type": "text", "id": "badge_link_label", "label": "Badge link label", "default": "Choose gift" },
+
+    { "type": "text", "id": "title", "label": "Hero title", "default": "The Gift Guide" },
+    { "type": "textarea", "id": "subtitle", "label": "Hero description", "default": "Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season." },
+    { "type": "url", "id": "cta_url", "label": "CTA URL" },
+    { "type": "text", "id": "cta_label", "label": "CTA label", "default": "Shop now" },
+    { "type": "text", "id": "bottom_caption", "label": "Bottom caption", "default": "SUSTAINABLE, ETHICALLY MADE ACTIVEWEAR" },
+
+    { "type": "text", "id": "grid_heading", "label": "Grid heading", "default": "Tisso vison in the wild" },
+
+    { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to cart" },
+    { "type": "text", "id": "choose_color_label", "label": "Color label", "default": "Color" },
+    { "type": "text", "id": "choose_size_label", "label": "Size label", "default": "Size" },
+
+    { "type": "product", "id": "upsell_product", "label": "Upsell product (auto-add when Black + Medium)" }
+  ],
+  "blocks": [
+    { "type": "product", "name": "Product", "settings": [ { "type": "product", "id": "product", "label": "Product" } ] }
+  ],
+  "max_blocks": 6,
+  "presets": [ { "name": "Figma landing" } ]
+}
+{% endschema %}

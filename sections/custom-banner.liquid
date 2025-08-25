@@ -1,0 +1,89 @@
+<!-- sections/custom-banner.liquid -->
+<div class="ce-banner"
+  style="position:relative;padding:48px 20px;border-radius:12px;overflow:hidden;background:#fff;">
+  {% if section.settings.bg_image != blank %}
+    <img
+      class="ce-bg ce-bg--desktop"
+      src="{{ section.settings.bg_image | image_url: width: 2400 }}"
+      alt="{{ section.settings.title | escape }}"
+      loading="lazy"
+      style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;">
+  {% endif %}
+
+  {% if section.settings.bg_image_mobile != blank %}
+    <img
+      class="ce-bg ce-bg--mobile"
+      src="{{ section.settings.bg_image_mobile | image_url: width: 1400 }}"
+      alt="{{ section.settings.title | escape }}"
+      loading="lazy"
+      style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;">
+  {% endif %}
+
+  {% if section.settings.overlay_opacity > 0 %}
+    <div class="ce-overlay"
+      style="position:absolute;inset:0;background:{{ section.settings.overlay_color }};opacity:{{ section.settings.overlay_opacity | divided_by: 100.0 }};">
+    </div>
+  {% endif %}
+
+  <div class="ce-banner-inner"
+       style="position:relative;max-width:1200px;margin:0 auto;text-align:{{ section.settings.text_align }};">
+    <h1 class="ce-banner-title" style="color:{{ section.settings.text_color }}">{{ section.settings.title }}</h1>
+    <div class="ce-banner-sub" style="color:{{ section.settings.text_color | color_modify: 'alpha', 0.85 }}">{{ section.settings.subtitle }}</div>
+    <div class="ce-cta" style="{% if section.settings.text_align == 'center' %}justify-content:center;{% elsif section.settings.text_align == 'right' %}justify-content:flex-end;{% endif %} display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;">
+      {% if section.settings.primary_label != blank %}
+        <a class="ce-btn ce-btn-primary" href="{{ section.settings.primary_link }}">{{ section.settings.primary_label }}</a>
+      {% endif %}
+      {% if section.settings.secondary_label != blank %}
+        <a class="ce-btn ce-btn-secondary" href="{{ section.settings.secondary_link }}">{{ section.settings.secondary_label }}</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+.ce-banner-title{font-size:36px;margin:10px 0}
+.ce-banner-sub{margin:12px 0}
+.ce-btn{display:inline-block;padding:10px 18px;border-radius:6px;text-decoration:none;transition:transform .18s,box-shadow .18s}
+.ce-btn-primary{background:#4a2baa;color:#fff}
+.ce-btn-secondary{background:transparent;border:2px solid #4a2baa;color:#4a2baa}
+.ce-btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(74,43,170,.12)}
+/* desktop image by default; swap to mobile under 720px */
+@media(max-width:720px){
+  .ce-bg--desktop{display:none !important}
+  .ce-bg--mobile{display:block !important}
+  .ce-banner-title{font-size:22px}
+  .ce-banner-inner{padding:0 12px}
+}
+</style>
+
+{% schema %}
+{
+  "name": "Custom Banner (challenge)",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Main title", "default": "Style That Defines You" },
+    { "type": "textarea", "id": "subtitle", "label": "Subtitle", "default": "Handpicked pieces for every moment." },
+
+    { "type": "text", "id": "primary_label", "label": "Primary button label", "default": "Shop now" },
+    { "type": "url",  "id": "primary_link",  "label": "Primary link", "default": "/" },
+
+    { "type": "text", "id": "secondary_label", "label": "Secondary button label", "default": "Learn more" },
+    { "type": "url",  "id": "secondary_link", "label": "Secondary link", "default": "/" },
+
+    { "type": "image_picker", "id": "bg_image", "label": "Banner image (desktop)" },
+    { "type": "image_picker", "id": "bg_image_mobile", "label": "Banner image (mobile, optional)" },
+
+    { "type": "color", "id": "overlay_color", "label": "Overlay color", "default": "#000000" },
+    { "type": "range", "id": "overlay_opacity", "label": "Overlay opacity (%)", "min": 0, "max": 80, "step": 5, "default": 20 },
+
+    { "type": "select", "id": "text_align", "label": "Text alignment", "default": "left",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ]
+    },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#222222" }
+  ],
+  "presets": [{ "name": "Custom banner (challenge)" }]
+}
+{% endschema %}

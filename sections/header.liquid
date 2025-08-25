@@ -1,0 +1,352 @@
+{% comment %}
+  HEADER.LIQUID — Single-bar TISSO VISON header (desktop/tablet)
+  + Mobile drawer promo matching screenshot (centered brand, tagline, full-width CTA).
+{% endcomment %}
+
+<link rel="stylesheet" href="{{ 'component-list-menu.css' | asset_url }}" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="{{ 'component-search.css' | asset_url }}" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="{{ 'component-menu-drawer.css' | asset_url }}" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="{{ 'component-cart-notification.css' | asset_url }}" media="print" onload="this.media='all'">
+{%- if settings.predictive_search_enabled -%}
+  <link rel="stylesheet" href="{{ 'component-price.css' | asset_url }}" media="print" onload="this.media='all'">
+{%- endif -%}
+{%- if section.settings.menu_type_desktop == 'mega' -%}
+  <link rel="stylesheet" href="{{ 'component-mega-menu.css' | asset_url }}" media="print" onload="this.media='all'">
+{%- endif -%}
+
+<style>
+  /* Hide Dawn's hamburger on desktop if menu isn't drawer */
+  {%- if section.settings.menu_type_desktop != "drawer" -%}
+  @media (min-width: 990px){ header-drawer{ display:none; } }
+  {%- endif -%}
+
+  /* ——— Single TISSO VISON header bar (desktop/tablet) ——— */
+  .tisso-header-wrap{
+    position: relative;
+    border-top: 3px solid #82c7ff;      /* thin blue rail */
+    background: #f6f6f6;                 /* light gray */
+  }
+  .tisso-header{
+    max-width: var(--page-width, 1200px);
+    margin: 0 auto;
+    padding: .9rem 1rem;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;   /* left (logo/menu) • copy • CTA */
+    align-items: center;
+    gap: .75rem;
+  }
+
+  /* Left cluster: hamburger (mobile) + brand/logo link */
+  .tisso-left{ display:flex; align-items:center; gap:.5rem }
+  .tisso-brand{
+    font-weight: 700;
+    letter-spacing: .25rem;
+    text-transform: uppercase;
+    font-size: clamp(.95rem, 1vw + .65rem, 1.2rem);
+    white-space: nowrap;
+  }
+
+  /* Center copy */
+  .tisso-copy{ text-align: center; font-size: .98rem; }
+
+  /* Right CTA */
+  .tisso-cta{
+    justify-self: end;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .75rem;
+    background: #ffea3a;
+    color: #000;
+    font-weight: 700;
+    padding: .9rem 1.3rem;
+    border-radius: .35rem;
+    border: 1px solid rgba(0,0,0,.08);
+  }
+  .tisso-cta svg{ width:22px; height:22px }
+
+  /* Laptop tightening */
+  @media (max-width: 1200px){ .tisso-copy{ font-size: .95rem } }
+
+  /* Mobile layout: 2 rows (left+CTA, then copy) */
+  @media (max-width: 989px){
+    .tisso-header{
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "left cta"
+        "copy copy";
+      row-gap: .5rem;
+    }
+    .tisso-left{ grid-area:left }
+    .tisso-copy{ grid-area:copy; text-align:center; padding: .25rem 0 .4rem }
+    .tisso-cta{ grid-area:cta; justify-self:end }
+  }
+
+  /* Sticky depth on scroll */
+  .shopify-section-header-sticky .tisso-header-wrap{ box-shadow: 0 6px 16px rgba(0,0,0,.06); }
+
+  /* ——— MOBILE DRAWER PROMO (matches screenshot) ——— */
+  /* Thin gray divider under the drawer's own top bar */
+  .menu-drawer__navigation .tisso-drawer-divider{
+    height: 1px; background: #e8e8e8; width: 100%;
+  }
+  .tisso-promo-card{
+    background: transparent;            /* drawer bg */
+    padding: 1rem 1rem 1.5rem;
+  }
+  .tisso-promo-card__brand{
+    text-align:center;
+    font-weight:700;
+    letter-spacing:.25rem;
+    text-transform:uppercase;
+    font-size: 1.05rem;
+    margin: .75rem 0 .25rem;
+  }
+  .tisso-promo-card__copy{ margin: .5rem 0 1rem; text-align:center }
+  .tisso-promo-card .tisso-cta{
+    width:100%; justify-content:center;
+    padding:.85rem 1.2rem; border-radius:.3rem;
+  }
+</style>
+
+{%- style -%}
+  .section-header { position: sticky; margin-bottom: 0; } /* keep content snug */
+{%- endstyle -%}
+
+<script src="{{ 'cart-notification.js' | asset_url }}" defer="defer"></script>
+
+{%- assign has_app_block = false -%}
+{%- for block in section.blocks -%}{%- if block.type == '@app' -%}{%- assign has_app_block = true -%}{%- endif -%}{%- endfor -%}
+
+{% liquid
+  assign header_tag = 'div'
+  if section.settings.sticky_header_type != 'none'
+    assign header_tag = 'sticky-header'
+  endif
+%}
+
+<{{ header_tag }}
+  {% if header_tag == 'sticky-header' %}
+    data-sticky-type="{{ section.settings.sticky_header_type }}"
+  {% endif %}
+  class="header-wrapper color-{{ section.settings.color_scheme }} gradient{% if section.settings.show_line_separator %} header-wrapper--border-bottom{% endif %}"
+>
+  {%- comment %} Single combined header (no duplicate Dawn header) {% endcomment %}
+  <div class="tisso-header-wrap">
+    <div class="tisso-header page-width">
+      <div class="tisso-left">
+        {%- if section.settings.menu != blank -%}
+          {%- render 'header-drawer' -%}
+        {%- endif -%}
+
+        {%- if settings.logo != blank -%}
+          <a href="{{ routes.root_url }}" class="header__heading-link link link--text focus-inset" aria-label="{{ shop.name | escape }}">
+            <div class="header__heading-logo-wrapper" style="width:auto">
+              {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
+              {%- assign logo_height = settings.logo_width | divided_by: settings.logo.aspect_ratio -%}
+              {% capture sizes %}(max-width: {{ settings.logo_width | times: 2 }}px) 40vw, {{ settings.logo_width }}px{% endcapture %}
+              {% capture widths %}{{ settings.logo_width }}, {{ settings.logo_width | times: 1.5 | round }}, {{ settings.logo_width | times: 2 }}{% endcapture %}
+              {{
+                settings.logo
+                | image_url: width: 600
+                | image_tag:
+                  class: 'header__heading-logo motion-reduce',
+                  widths: widths,
+                  height: logo_height,
+                  width: settings.logo_width,
+                  alt: logo_alt,
+                  sizes: sizes,
+                  preload: true
+              }}
+            </div>
+          </a>
+        {%- else -%}
+          <a href="{{ routes.root_url }}" class="tisso-brand link link--text">TISSO&nbsp;&nbsp;VISON</a>
+        {%- endif -%}
+      </div>
+
+      <div class="tisso-copy">Find the ideal gift for your loved ones.</div>
+
+      <a class="tisso-cta" href="/cart">
+        CHOOSE GIFT
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.172 12 8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/></svg>
+      </a>
+    </div>
+  </div>
+</{{ header_tag }}>
+
+{%- if settings.cart_type == 'notification' -%}
+  {%- render 'cart-notification',
+    color_scheme: section.settings.color_scheme,
+    desktop_menu_type: section.settings.menu_type_desktop
+  -%}
+{%- endif -%}
+
+{% javascript %}
+  /* Sticky behavior retained for the single bar */
+  class StickyHeader extends HTMLElement {
+    constructor(){ super(); }
+    connectedCallback(){
+      this.header = document.querySelector('.section-header');
+      this.headerIsAlwaysSticky =
+        this.getAttribute('data-sticky-type') === 'always' ||
+        this.getAttribute('data-sticky-type') === 'reduce-logo-size';
+      this.headerBounds = {};
+      this.setHeaderHeight();
+      window.matchMedia('(max-width: 990px)').addEventListener('change', this.setHeaderHeight.bind(this));
+      if (this.headerIsAlwaysSticky) this.header.classList.add('shopify-section-header-sticky');
+      this.currentScrollTop = 0;
+      this.onScrollHandler = this.onScroll.bind(this);
+      window.addEventListener('scroll', this.onScrollHandler, false);
+      this.createObserver();
+    }
+    setHeaderHeight(){ document.documentElement.style.setProperty('--header-height', `${this.header.offsetHeight}px`); }
+    disconnectedCallback(){ window.removeEventListener('scroll', this.onScrollHandler); }
+    createObserver(){
+      let observer = new IntersectionObserver((entries, observer) => {
+        this.headerBounds = entries[0].intersectionRect; observer.disconnect();
+      });
+      observer.observe(this.header);
+    }
+    onScroll(){
+      const st = window.pageYOffset || document.documentElement.scrollTop;
+      if (st > this.currentScrollTop && st > this.headerBounds.bottom){
+        this.header.classList.add('scrolled-past-header');
+        if (!this.headerIsAlwaysSticky) requestAnimationFrame(()=>this.header.classList.add('shopify-section-header-hidden','shopify-section-header-sticky'));
+      } else if (st < this.currentScrollTop && st > this.headerBounds.bottom){
+        this.header.classList.add('scrolled-past-header');
+        if (!this.headerIsAlwaysSticky) requestAnimationFrame(()=>{
+          this.header.classList.add('shopify-section-header-sticky','animate');
+          this.header.classList.remove('shopify-section-header-hidden');
+        });
+      } else if (st <= this.headerBounds.top){
+        this.header.classList.remove('scrolled-past-header');
+        if (!this.headerIsAlwaysSticky) requestAnimationFrame(()=>{
+          this.header.classList.remove('shopify-section-header-hidden','shopify-section-header-sticky','animate');
+        });
+      }
+      this.currentScrollTop = st;
+    }
+  }
+  customElements.define('sticky-header', StickyHeader);
+{% endjavascript %}
+
+<!-- Drawer promo template + injection (centered brand, divider, full-width CTA) -->
+<template id="tisso-promo-template">
+  <div class="tisso-drawer-divider" role="presentation"></div>
+  <div class="tisso-promo-card color-{{ section.settings.menu_color_scheme }}">
+    <div class="tisso-promo-card__brand">TISSO&nbsp;&nbsp;VISON</div>
+    <p class="tisso-promo-card__copy">Find the ideal gift for your loved ones.</p>
+    <a class="tisso-cta" href="/collections/gifts" aria-label="Choose gift">
+      CHOOSE GIFT
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.172 12 8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/></svg>
+    </a>
+  </div>
+</template>
+<script>
+  (function(){
+    const mq = window.matchMedia('(max-width: 989px)');
+    function injectIntoDrawer(){
+      const tmpl = document.getElementById('tisso-promo-template');
+      if(!tmpl) return;
+
+      // Dawn drawer content container
+      const drawerNav = document.querySelector('.menu-drawer__navigation, .menu-drawer__menu');
+      if(!drawerNav || drawerNav.querySelector('.tisso-promo-card')) return;
+
+      const node = tmpl.content.cloneNode(true);
+
+      // Place right after the existing top area (close button/title) for a perfect match to the screenshot
+      const firstChild = drawerNav.querySelector(':scope > *');
+      if(firstChild){ drawerNav.insertBefore(node, firstChild.nextSibling); }
+      else { drawerNav.prepend(node); }
+    }
+
+    // Watch for drawer open/close and DOM changes
+    const obs = new MutationObserver(()=>injectIntoDrawer());
+    obs.observe(document.documentElement, {subtree:true, attributes:true, attributeFilter:['open','class']});
+
+    if(mq.matches) injectIntoDrawer();
+    mq.addEventListener('change', e=>{ if(e.matches) setTimeout(injectIntoDrawer,50); });
+  })();
+</script>
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    {% if settings.logo %}
+      "logo": {{ settings.logo | image_url: width: 500 | prepend: "https:" | json }},
+    {% endif %}
+    "sameAs": [
+      {{ settings.social_twitter_link | json }},
+      {{ settings.social_facebook_link | json }},
+      {{ settings.social_pinterest_link | json }},
+      {{ settings.social_instagram_link | json }},
+      {{ settings.social_tiktok_link | json }},
+      {{ settings.social_tumblr_link | json }},
+      {{ settings.social_snapchat_link | json }},
+      {{ settings.social_youtube_link | json }},
+      {{ settings.social_vimeo_link | json }}
+    ],
+    "url": {{ request.origin | append: page.url | json }}
+  }
+</script>
+
+{%- if request.page_type == 'index' -%}
+  {% assign potential_action_target = request.origin | append: routes.search_url | append: '?q={search_term_string}' %}
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "WebSite",
+      "name": {{ shop.name | json }},
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {{ potential_action_target | json }},
+        "query-input": "required name=search_term_string"
+      },
+      "url": {{ request.origin | append: page.url | json }}
+    }
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:sections.header.name",
+  "class": "section-header",
+  "max_blocks": 3,
+  "settings": [
+    {
+      "type": "select",
+      "id": "menu_type_desktop",
+      "options": [
+        { "value": "dropdown", "label": "t:sections.header.settings.menu_type_desktop.options__1.label" },
+        { "value": "mega", "label": "t:sections.header.settings.menu_type_desktop.options__2.label" },
+        { "value": "drawer", "label": "t:sections.header.settings.menu_type_desktop.options__3.label" }
+      ],
+      "default": "drawer",
+      "label": "t:sections.header.settings.menu_type_desktop.label"
+    },
+    { "type": "link_list", "id": "menu", "default": "main-menu", "label": "t:sections.header.settings.menu.label" },
+    {
+      "type": "select",
+      "id": "sticky_header_type",
+      "options": [
+        { "value": "none", "label": "t:sections.header.settings.sticky_header_type.options__1.label" },
+        { "value": "on-scroll-up", "label": "t:sections.header.settings.sticky_header_type.options__2.label" },
+        { "value": "always", "label": "t:sections.header.settings.sticky_header_type.options__3.label" },
+        { "value": "reduce-logo-size", "label": "t:sections.header.settings.sticky_header_type.options__4.label" }
+      ],
+      "default": "on-scroll-up",
+      "label": "t:sections.header.settings.sticky_header_type.label"
+    },
+    { "type": "checkbox", "id": "show_line_separator", "default": false, "label": "t:sections.header.settings.show_line_separator.label" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:sections.all.colors.label", "default": "scheme-1" },
+    { "type": "color_scheme", "id": "menu_color_scheme", "label": "t:sections.header.settings.menu_color_scheme.label", "default": "scheme-1" }
+  ],
+  "blocks": [
+    { "type": "@app" }
+  ]
+}
+{% endschema %}

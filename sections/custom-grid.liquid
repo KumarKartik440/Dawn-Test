@@ -1,0 +1,194 @@
+<!-- sections/custom-grid.liquid -->
+<div class="ce-grid-wrap" id="ce-grid-wrap">
+  <div class="ce-grid-inner" style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:28px 20px;">
+    {% for block in section.blocks %}
+      {% if block.type == 'product_block' and block.settings.product %}
+        {% assign handle_from_setting = block.settings.product.handle | default: block.settings.product %}
+        {% assign p = all_products[handle_from_setting] %}
+        {% if p %}
+          <article class="ce-tile" data-handle="{{ p.handle }}">
+            <div class="ce-tile-img">
+              <img src="{{ p.featured_image | img_url: '800x' }}" alt="{{ p.title }}">
+            </div>
+            <h3 class="ce-tile-title">{{ p.title }}</h3>
+            <div class="ce-tile-price">{{ p.price | money }}</div>
+            <button type="button" class="ce-open" data-handle="{{ p.handle }}">View</button>
+          </article>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Popup -->
+<div id="ce-popup" class="ce-popup" aria-hidden="true" style="display:none;">
+  <div class="ce-popup-backdrop" style="position:fixed;inset:0;background:rgba(0,0,0,.5)"></div>
+  <div class="ce-popup-inner" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;max-width:700px;width:94%;padding:20px;border-radius:8px;">
+    <button id="ce-close" style="float:right;border:none;background:transparent;font-size:24px;">×</button>
+    <h2 id="ce-title"></h2>
+    <div id="ce-desc"></div>
+    <div id="ce-variants"></div>
+    <div style="margin-top:12px;">
+      <button id="ce-add" style="padding:10px 18px;background:#4a2baa;color:#fff;border-radius:6px;border:none">ADD TO CART</button>
+    </div>
+    <div id="ce-msg" style="margin-top:10px;color:green;display:none;"></div>
+  </div>
+</div>
+
+<style>
+.ce-tile{background:#fff;border:1px solid #eee;padding:12px;border-radius:8px;text-align:center}
+.ce-tile-img img{width:100%;height:220px;object-fit:cover;border-radius:6px}
+.ce-open{margin-top:8px;padding:8px 12px;border-radius:6px;border:1px solid #4a2baa;background:transparent;color:#4a2baa;cursor:pointer}
+@media(max-width:900px){ .ce-grid-inner{grid-template-columns:repeat(2,1fr)} .ce-tile-img img{height:180px} }
+@media(max-width:480px){ .ce-grid-inner{grid-template-columns:1fr} .ce-tile-img img{height:160px} }
+.ce-popup{z-index:9999}
+.ce-popup-backdrop{z-index:9998}
+.ce-popup-inner{z-index:10000}
+</style>
+
+{% schema %}
+{
+  "name": "Custom Grid (challenge)",
+  "blocks": [
+    {
+      "type": "product_block",
+      "name": "Product block",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Select product" }
+      ]
+    }
+  ],
+  "settings": [
+    { "type": "product", "id": "soft_jacket", "label": "Soft Winter Jacket (auto-add target - select product)" }
+  ],
+  "max_blocks": 6,
+  "presets": [{ "name": "Custom grid (challenge)" }]
+}
+{% endschema %}
+
+{% javascript %}
+(function(){
+  // Scope to this section instance
+  const root = document.getElementById('shopify-section-{{ section.id }}');
+  if(!root) return;
+
+  const grid       = root.querySelector('#ce-grid-wrap');
+  const popup      = root.querySelector('#ce-popup');
+  const closeBtn   = root.querySelector('#ce-close');
+  const titleEl    = root.querySelector('#ce-title');
+  const descEl     = root.querySelector('#ce-desc');
+  const variantsEl = root.querySelector('#ce-variants');
+  const addBtn     = root.querySelector('#ce-add');
+  const msgEl      = root.querySelector('#ce-msg');
+
+  let chosenVariantId = null;
+
+  async function fetchProduct(handle){
+    const res = await fetch(`/products/${handle}.js`);
+    if(!res.ok) throw new Error('Product fetch failed: ' + handle);
+    return res.json();
+  }
+
+  function renderVariants(product){
+    variantsEl.innerHTML = '';
+    if(!product.variants?.length) return;
+
+    const selects = [];
+    product.options.forEach((optName, idx)=>{
+      const wrap = document.createElement('div'); wrap.style.marginTop='8px';
+      const label = document.createElement('label'); label.textContent = optName; wrap.appendChild(label);
+      const sel = document.createElement('select'); sel.dataset.index = idx;
+
+      const values = [];
+      product.variants.forEach(v=>{
+        const val = v.options[idx];
+        if(!values.includes(val)) values.push(val);
+      });
+      values.forEach(vv=>{
+        const o = document.createElement('option'); o.value = vv; o.textContent = vv; sel.appendChild(o);
+      });
+
+      wrap.appendChild(sel);
+      variantsEl.appendChild(wrap);
+      selects.push(sel);
+    });
+
+    function computeVariant(){
+      const chosen = selects.map(s=>s.value);
+      const match = product.variants.find(v => v.options.every((opt,i)=>opt===chosen[i]));
+      if(match) chosenVariantId = match.id;
+    }
+    selects.forEach(s=>s.addEventListener('change', computeVariant));
+    chosenVariantId = product.variants[0].id; // default
+  }
+
+  // Delegated click: prevent native links and open popup
+  grid?.addEventListener('click', async (e)=>{
+    const link = e.target.closest('a');
+    if (link && link.closest('.ce-tile')) { e.preventDefault(); e.stopPropagation(); }
+
+    const btn   = e.target.closest('.ce-open');
+    const tile  = e.target.closest('.ce-tile');
+    const handle = btn?.dataset.handle || tile?.dataset.handle;
+    if(!handle) return;
+
+    e.preventDefault(); e.stopPropagation();
+
+    try{
+      const product = await fetchProduct(handle);
+      titleEl.textContent = product.title;
+      descEl.innerHTML = product.body_html || product.description || '';
+      renderVariants(product);
+      popup.style.display = 'block';
+      popup.setAttribute('aria-hidden','false');
+      msgEl.style.display = 'none';
+    }catch(err){
+      console.error(err);
+      alert('Failed to load product data');
+    }
+  });
+
+  closeBtn?.addEventListener('click', ()=>{
+    popup.style.display='none';
+    popup.setAttribute('aria-hidden','true');
+  });
+
+  async function addToCart(variantId, qty=1){
+    const res = await fetch('/cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: [{ id: variantId, quantity: qty }] })
+    });
+    if(!res.ok) throw new Error('Add to cart failed');
+    return res.json();
+  }
+
+  addBtn?.addEventListener('click', async ()=>{
+    if(!chosenVariantId){ alert('Please select variant'); return; }
+    try{
+      // add chosen item
+      await addToCart(chosenVariantId, 1);
+
+      // auto-add jacket if Black + Medium chosen
+      const selectedVals = Array.from(variantsEl.querySelectorAll('select')).map(s=>s.value.toLowerCase());
+      const needsJacket = selectedVals.includes('black') && selectedVals.includes('medium');
+
+      if(needsJacket){
+        const jacketHandle = '{{ section.settings.soft_jacket.handle | default: section.settings.soft_jacket }}';
+        if(jacketHandle){
+          try{
+            const jacket = await fetch(`/products/${jacketHandle}.js`).then(r=>r.json());
+            if(jacket?.variants?.[0]) await addToCart(jacket.variants[0].id, 1);
+          }catch(e){ console.warn('Auto-add jacket failed', e); }
+        }
+      }
+
+      msgEl.textContent = 'Product added to cart';
+      msgEl.style.display = 'block';
+    }catch(err){
+      console.error(err);
+      alert('Failed to add to cart');
+    }
+  });
+})();
+{% endjavascript %}

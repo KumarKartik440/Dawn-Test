@@ -1,0 +1,30 @@
+{
+  "sections": {
+    "main": {
+      "type": "figma-landing",
+      "settings": {
+        "ribbon_text": "Find the ideal gift for your loved ones.",
+        "badge_text": "CHOOSE GIFT",
+        "badge_link_label": "Choose gift",
+        "title": "The Gift Guide",
+        "subtitle": "Discover Joy: Your Ultimate Holiday Gift Destination. Explore our curated selection and find the perfect gifts to delight your loved ones this holiday season.",
+        "cta_label": "SHOP NOW",
+        "bottom_caption": "SUSTAINABLE, ETHICALLY MADE ACTIVEWEAR",
+        "grid_heading": "Tisso vison in the wild",
+        "add_to_cart_label": "ADD TO CART",
+        "choose_color_label": "Color",
+        "choose_size_label": "Size"
+      },
+      "blocks": {
+        "prod1": { "type": "product", "settings": { "product": "" } },
+        "prod2": { "type": "product", "settings": { "product": "" } },
+        "prod3": { "type": "product", "settings": { "product": "" } },
+        "prod4": { "type": "product", "settings": { "product": "" } },
+        "prod5": { "type": "product", "settings": { "product": "" } },
+        "prod6": { "type": "product", "settings": { "product": "" } }
+      },
+      "block_order": ["prod1","prod2","prod3","prod4","prod5","prod6"]
+    }
+  },
+  "order": ["main"]
+}
